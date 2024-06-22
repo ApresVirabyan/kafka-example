@@ -2,11 +2,9 @@ package com.example.consumer.config;
 
 import static org.springframework.kafka.support.serializer.JsonDeserializer.TYPE_MAPPINGS;
 
-import com.example.consumer.model.StringValue;
+import com.example.consumer.model.Message;
 
-import com.example.consumer.repository.StringValueRepository;
-import com.example.consumer.service.StringValueConsumer;
-import com.example.consumer.service.StringValueConsumerLogger;
+import com.example.consumer.service.MessageConsumer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.apache.kafka.clients.admin.NewTopic;
@@ -52,7 +50,7 @@ public class ApplicationConfig {
     }
 
     @Bean
-    public ConsumerFactory<String, StringValue> consumerFactory(
+    public ConsumerFactory<String, Message> consumerFactory(
             KafkaProperties kafkaProperties,
             ObjectMapper objectMapper
     ) {
@@ -61,19 +59,19 @@ public class ApplicationConfig {
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
         props.put(ErrorHandlingDeserializer.VALUE_FUNCTION, "com.example.consumer.config.CustomValueDeserializer");
         props.put(JsonDeserializer.TRUSTED_PACKAGES, "com.example.consumer.model.*,com.example.producer.model.*");
-        props.put(TYPE_MAPPINGS, "stringvalue:com.example.consumer.model.StringValue");
+        props.put(TYPE_MAPPINGS, "stringvalue:com.example.consumer.model.Message");
         props.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, 3);
         props.put(ConsumerConfig.MAX_POLL_INTERVAL_MS_CONFIG, 3000);
 
         return new DefaultKafkaConsumerFactory<>(props, new StringDeserializer(),
-                new JsonDeserializer<>(StringValue.class, objectMapper, false));
+                new JsonDeserializer<>(Message.class, objectMapper, false));
     }
 
-    @Bean("listenerContainerFactory")
-    public KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, StringValue>> listenerContainerFactory(
-            ConsumerFactory<String, StringValue> consumerFactory) {
+    @Bean("messageFactory")
+    public KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, Message>> listenerContainerFactory(
+            ConsumerFactory<String, Message> consumerFactory) {
 
-        var factory = new ConcurrentKafkaListenerContainerFactory<String, StringValue>();
+        var factory = new ConcurrentKafkaListenerContainerFactory<String, Message>();
         factory.setConsumerFactory(consumerFactory);
         factory.setBatchListener(true);
         factory.setConcurrency(1);
@@ -93,25 +91,25 @@ public class ApplicationConfig {
     }
 
     @Bean
-    public KafkaClient stringValueConsumer(StringValueConsumer stringValueConsumer){
-        return new KafkaClient(stringValueConsumer);
+    public KafkaClient stringValueConsumer(MessageConsumer messageConsumer){
+        return new KafkaClient(messageConsumer);
     }
 
     public static class KafkaClient{
-        private final StringValueConsumer stringValueConsumer;
+        private final MessageConsumer messageConsumer;
 
-        public KafkaClient(StringValueConsumer stringValueConsumer) {
-            this.stringValueConsumer = stringValueConsumer;
+        public KafkaClient(MessageConsumer messageConsumer) {
+            this.messageConsumer = messageConsumer;
         }
 
         @KafkaListener(
                 topics = "${application.kafka.topic}",
-                containerFactory = "listenerContainerFactory",
+                containerFactory = "messageFactory",
                 groupId = "${spring.kafka.consumer.group-id}"
         )
-        public void listen(@Payload List<StringValue> values){
+        public void listen(@Payload List<Message> values){
               log.info("values, values.size:{}", values.size());
-              stringValueConsumer.accept(values);
+              messageConsumer.accept(values);
         }
     }
 

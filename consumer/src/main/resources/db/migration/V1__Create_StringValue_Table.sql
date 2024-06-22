@@ -1,6 +1,7 @@
-CREATE DATABASE postgres;
+CREATE SCHEMA postgres;
 
-CREATE TABLE string_value_entity (
+CREATE TABLE messages (
     id BIGSERIAL PRIMARY KEY,
-    value VARCHAR(255) NOT NULL
+    text VARCHAR(255) NOT NULL,
+    date TIMESTAMP NOT NULL
 );

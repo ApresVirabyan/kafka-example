@@ -1,14 +1,14 @@
 application:
   kafka:
-    topic: "demo-topic"
+    topic: "message-topic"
 
 
 spring:
   kafka:
     consumer:
-      group-id: "test-group"
+      group-id: "message-group"
       bootstrap-servers: "localhost:9092"
-      client-id: "demo-consumer"
+      client-id: "message-consumer"
       auto-offset-reset: earliest
       value-deserializer: "org.springframework.kafka.support.serializer.ErrorHandlingDeserializer"
 
@@ -24,3 +24,4 @@ spring:
   flyway:
     enabled: true
     locations: classpath:db/migration
+    mixed: true

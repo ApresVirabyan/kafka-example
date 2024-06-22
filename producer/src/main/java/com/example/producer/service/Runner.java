@@ -6,14 +6,14 @@ import org.springframework.stereotype.Service;
 @Service
 public class Runner implements CommandLineRunner {
 
-    private final ValueSource valueSource;
+    private final MessageService service;
 
-    public Runner(ValueSource valueSource) {
-        this.valueSource = valueSource;
+    public Runner(MessageService service) {
+        this.service = service;
     }
 
     @Override
     public void run(String... args) throws Exception {
-        valueSource.generate();
+        service.generate();
     }
 }

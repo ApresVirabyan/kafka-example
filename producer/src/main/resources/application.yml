@@ -3,10 +3,10 @@ server:
 
 application:
   kafka:
-    topic: "demo-topic"
+    topic: "message-topic"
 
 spring:
   kafka:
     producer:
       bootstrap-servers: "127.0.0.1:9092"
-      client-id: "demo-producer"
+      client-id: "message-producer"

@@ -1,9 +1,9 @@
 package com.example.producer.config;
 
-import com.example.producer.model.StringValue;
+import com.example.producer.model.Message;
 import com.example.producer.service.DataSender;
 import com.example.producer.service.DataSenderKafka;
-import com.example.producer.service.StringValueSource;
+import com.example.producer.service.MessageServiceImpl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.clients.producer.ProducerConfig;
@@ -23,12 +23,12 @@ import org.springframework.kafka.support.serializer.JsonSerializer;
 
 
 @Configuration
-public class KafkaConfig {
+public class ApplicationConfig {
 
-    private static final Logger log = LoggerFactory.getLogger(KafkaConfig.class);
+    private static final Logger log = LoggerFactory.getLogger(ApplicationConfig.class);
     private final String topicName;
 
-    public KafkaConfig(@Value("${application.kafka.topic}") String topicName) {
+    public ApplicationConfig(@Value("${application.kafka.topic}") String topicName) {
         this.topicName = topicName;
     }
 
@@ -38,7 +38,7 @@ public class KafkaConfig {
     }
 
     @Bean
-    public ProducerFactory<String, StringValue> producerFactory(
+    public ProducerFactory<String, Message> producerFactory(
             KafkaProperties kafkaProperties,
             ObjectMapper objectMapper
     ) {
@@ -46,15 +46,15 @@ public class KafkaConfig {
         props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
 
-        var kafkaProducerFactory = new DefaultKafkaProducerFactory<String, StringValue>(props);
+        var kafkaProducerFactory = new DefaultKafkaProducerFactory<String, Message>(props);
         kafkaProducerFactory.setValueSerializer(new JsonSerializer<>(objectMapper));
 
         return kafkaProducerFactory;
     }
 
     @Bean
-    public KafkaTemplate<String, StringValue> kafkaTemplate(
-            ProducerFactory<String, StringValue> producerFactory
+    public KafkaTemplate<String, Message> kafkaTemplate(
+            ProducerFactory<String, Message> producerFactory
     ){
         return new KafkaTemplate<>(producerFactory);
     }
@@ -67,17 +67,17 @@ public class KafkaConfig {
     @Bean
     public DataSender dataSender(
             NewTopic topic,
-            KafkaTemplate<String, StringValue> kafkaTemplate
+            KafkaTemplate<String, Message> kafkaTemplate
     ){
         return new DataSenderKafka(
                 topic.name(),
                 kafkaTemplate,
-                stringValue -> log.info("asked, value:{} ", stringValue));
+                message -> log.info("asked, text:{} ", message));
     }
 
     @Bean
-    public StringValueSource stringValueSource(DataSender dataSender){
-        return new StringValueSource(dataSender);
+    public MessageServiceImpl messageServiceImpl(DataSender dataSender){
+        return new MessageServiceImpl(dataSender);
     }
 
 }

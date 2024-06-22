@@ -1,5 +1,5 @@
 package com.example.producer.service;
 
-public interface ValueSource {
+public interface MessageService {
     void generate();
 }
