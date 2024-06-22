@@ -4,6 +4,7 @@ import static org.springframework.kafka.support.serializer.JsonDeserializer.TYPE
 
 import com.example.consumer.model.StringValue;
 
+import com.example.consumer.repository.StringValueRepository;
 import com.example.consumer.service.StringValueConsumer;
 import com.example.consumer.service.StringValueConsumerLogger;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -89,11 +90,6 @@ public class ApplicationConfig {
     @Bean
     public NewTopic topic(){
         return TopicBuilder.name(topicName).partitions(1).replicas(1).build();
-    }
-
-    @Bean
-    public StringValueConsumer stringValueConsumerLogger(){
-        return new StringValueConsumerLogger();
     }
 
     @Bean
