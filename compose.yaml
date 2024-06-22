@@ -1,10 +1,10 @@
 services:
   postgres:
-    image: 'postgres:latest'
+    image: postgres:latest
     environment:
-      - 'POSTGRES_DB=post'
-      - 'POSTGRES_PASSWORD=post'
-      - 'POSTGRES_USER=post'
+      POSTGRES_DB: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: postgres
     ports:
       - "5432:5432"
   zookeeper:
